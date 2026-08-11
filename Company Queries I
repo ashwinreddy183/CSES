@@ -1,0 +1,60 @@
+#include <bits/stdc++.h>
+#define ll long long
+using namespace std;
+
+void dfs(vector<vector<int>> &adj, vector<bool>&vis, vector<vector<int>> &up, int node){
+    vis[node] = true;
+    for(auto nbrs : adj[node]){
+        if(!vis[nbrs]){
+            up[nbrs][0] = node;
+            dfs(adj,vis,up,nbrs);
+        }
+    }
+}
+
+void solve() {
+    int n,q;cin >> n>>q;
+    vector<vector<int>> adj(n);
+    for(int i = 1; i < n; i++){
+        int u;cin>>u;u--;
+        adj[u].push_back(i);
+    }
+
+    vector<bool> vis(n,false);
+    vector<vector<int>> up(n,vector<int>(20,-1));
+    dfs(adj,vis,up,0);
+
+    for(int j=1;j<20;j++){
+        for(int node = 0; node < n; node++){
+            if(up[node][j-1] != -1){
+                up[node][j] = up[up[node][j-1]][j-1];
+            }
+        }
+    }
+    vector<int> output;
+    while(q--){
+        int node, k;cin >> node >> k;
+        node--;
+        for(int j=0;j<20;j++){
+            if(k & (1<<j)){
+                node = up[node][j];
+                if(node == -1)break;
+            }
+        }
+        if(node == -1)output.push_back(-1);
+        else output.push_back(node+1);
+    }
+    for(auto it:output){
+        cout<< it <<endl;
+    }
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int t = 1;
+    while(t--) solve();
+
+    return 0;
+}
