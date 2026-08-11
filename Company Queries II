@@ -1,0 +1,71 @@
+#include <bits/stdc++.h>
+#define ll long long
+using namespace std;
+
+void dfs(vector<bool>&vis,vector<vector<int>> &adj, vector<vector<int>>&up, vector<int> &depth, int node){
+    vis[node] = true;
+
+    for(auto nbrs: adj[node]){
+        if(!vis[nbrs]){
+            up[nbrs][0] = node;
+            depth[nbrs] = depth[node]+1;
+            dfs(vis,adj,up,depth,nbrs);
+        }
+    }
+    return;
+}
+
+int LCA(int u, int v, vector<vector<int>> &up, vector<int> &depth){
+    if(depth[u] < depth[v]) swap(u,v);
+    int dist = depth[u] - depth[v]; // now you need to move u node 'dist' size up 
+    
+    for(int j= 0;j< 20;j++){
+        if(dist & (1 << j)){
+            u = up[u][j];
+        }
+    }
+    if(u == v)return u;
+    // now you have two nodes (u,v) at same depth, and you want to find the first ancestor node of both of them such that both nodes are same
+    for(int j=19;j >=0;j--){
+        if(up[u][j] != up[v][j]){
+            u = up[u][j]; v= up[v][j];
+        }
+    }
+    return up[u][0];
+}
+
+void solve() {
+    int n,q;cin >> n>>q;
+    vector<vector<int>> adj(n);
+    for(int i = 1; i < n; i++){
+        int u;cin>>u;u--;
+        adj[u].push_back(i);
+    }
+
+    vector<bool> vis(n,false);
+    vector<vector<int>> up(n,vector<int>(20,0));
+    vector<int> depth(n);depth[0]=0;
+    dfs(vis,adj,up,depth,0);
+
+    for(int j=1;j<20;j++){
+        for(int node=0;node<n;node++){
+            up[node][j] = up[up[node][j-1]][j-1];
+        }
+    }
+
+    while(q--){
+        int u,v;cin>>u>>v; u--,v--;
+        cout<< LCA(u,v,up,depth) + 1 <<endl;
+    }
+
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int t = 1;
+    while(t--) solve();
+
+    return 0;
+}
